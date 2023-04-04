@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Domain.fs" />
+    <Compile Include="Operation/Direction.fs" />
+    <Compile Include="Operation/Grove.fs" />
+    <Compile Include="Operation/Action.fs" />
+    <Compile Include="Operation/Round.fs" />
+    <Compile Include="Operation/Simulation.fs" />
+    <Compile Include="Api.fs" />
+  </ItemGroup>
+
+</Project>
