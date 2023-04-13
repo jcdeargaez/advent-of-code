@@ -1,5 +1,7 @@
 namespace Domain
 
+open System.Collections.Generic
+
 type Direction =
     | North
     | East
@@ -11,21 +13,11 @@ type Tile = {
     Y : int
 }
 
-type Grove = {
-    Width : int
-    Height : int
-    Elves : Tile Set
-}
-
-type GroveRectangle = {
-    NWTile : Tile
-    SETile : Tile
-}
+type Elves = HashSet<Tile>
 
 type MoveProposal = {
     Source : Tile
     Target : Tile
-    Direction : Direction
 }
 
 type Action =
@@ -33,13 +25,6 @@ type Action =
     | Move of MoveProposal
 
 type Round = {
-    Directions : Direction List
-    Actions : Action List
-    Collisions : Tile Set
-    Grove : Grove
-    MinimumGroveRectangle : GroveRectangle
+    Elves : Elves
+    Moves : int
 }
-
-type Simulation =  {
-    Rounds : Round List
-} 

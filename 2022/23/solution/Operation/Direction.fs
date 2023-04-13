@@ -2,8 +2,7 @@ module Direction
 
 open Domain
 
-let initial = [North; South; West; East]
+let initial = [| North; South; West; East |]
 
-let cycle = function
-    | h :: t -> t @ [h]
-    | [] -> failwith "Empty directions"
+let cycle (dirs : Direction array) =
+    [| dirs.[1]; dirs.[2]; dirs.[3]; dirs.[0] |]

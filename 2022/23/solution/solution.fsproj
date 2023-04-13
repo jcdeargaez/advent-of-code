@@ -8,10 +8,8 @@
   <ItemGroup>
     <Compile Include="Domain.fs" />
     <Compile Include="Operation/Direction.fs" />
-    <Compile Include="Operation/Grove.fs" />
-    <Compile Include="Operation/Action.fs" />
+    <Compile Include="Operation/Elves.fs" />
     <Compile Include="Operation/Round.fs" />
-    <Compile Include="Operation/Simulation.fs" />
     <Compile Include="Api.fs" />
   </ItemGroup>
 

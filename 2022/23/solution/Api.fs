@@ -2,27 +2,57 @@ open System.IO
 
 open Domain
 
+let timeit f =
+    let sw = System.Diagnostics.Stopwatch.StartNew ()
+    let r = f ()
+    sw.Stop ()
+    printfn "%i ms" sw.ElapsedMilliseconds
+    r
+
+let simulate stop elves =
+    let rec round i directions elvesSoFar =
+        let result = Round.run elvesSoFar directions
+        if stop i result then i, result
+        else round (i + 1) (Direction.cycle directions) result.Elves
+    
+    elves
+    |> round 1 Direction.initial
+
+let computeEmptyTilesAfterRounds rounds elves =
+    let finalRound =
+        elves
+        |> simulate (fun i _ -> i >= rounds)
+        |> snd
+    
+    finalRound.Elves
+    |> Elves.computeEmptyTiles
+
+let findEmptyMovesRound grove =
+    grove
+    |> simulate (fun _ result -> result.Moves = 0)
+    |> fst
+
 [<EntryPoint>]
 let main _ =
-    let simulation =
+    let elves = timeit (fun () ->
         File.ReadLines "input.txt"
-        |> Simulation.run 20
+        // File.ReadLines "sample.txt"
+        |> Elves.parse
+    )
 
-    simulation.Rounds
-    |> Seq.indexed
-    |> Seq.iter (fun (i, r) ->
-        printfn "Round %i" (i + 1)
+    printfn "Parsed grove"
 
-        Grove.toString r.Grove
-        |> printfn "%s"
-        
-        let minRectArea = (r.MinimumGroveRectangle.SETile.X - r.MinimumGroveRectangle.NWTile.X) * (r.MinimumGroveRectangle.SETile.Y - r.MinimumGroveRectangle.NWTile.Y)
-        let moves =
-            r.Actions
-            |> List.sumBy (function | Move _ -> 1 | _ -> 0)
-        
-        printfn "Moves: %i" moves
-        printfn "Min rectangle area: %i" minRectArea
-        printfn "")
+    let part1 = timeit (fun () ->
+        elves
+        |> computeEmptyTilesAfterRounds 10
+    )
 
+    printfn "Part 1 - Empty tiles after 10 rounds: %i" part1
+
+    let part2 = timeit (fun () ->
+        elves
+        |> findEmptyMovesRound
+    )
+
+    printfn "Part 2 - Rounds until no moves: %i" part2
     0

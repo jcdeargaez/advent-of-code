@@ -1,39 +1,53 @@
 module Round
 
+open System.Collections.Generic
+
 open Domain
 
-let run grove directions =
-    let processElf stateSoFar tile =
-        let (actionsSoFar, targetsSoFar) = stateSoFar
-        let action = Action.compute grove tile directions
-        let newTargets =
-            match action with
-            | Stay _ -> targetsSoFar
-            | Move mp ->
-                targetsSoFar
-                |> Map.change mp.Target (function
-                    | Some times -> times + 1 |> Some
-                    | None -> Some 0)
-        action :: actionsSoFar, newTargets
+let areElvesAround (elves : Elves) =
+    Array.exists elves.Contains
 
-    let (actions, targets) =
-        grove.Elves
-        |> Set.fold processElf (List.empty, Map.empty)
+let proposeAction (elves : Elves) tile directions =
+    let rec next i =
+        if i = Array.length directions then Stay tile
+        else
+            let direction = directions.[i]
+            if tile |> Elves.frontTiles direction |> areElvesAround elves then next (i + 1)
+            else
+                let frontTile =
+                    match direction with
+                    | North -> {tile with Y = tile.Y - 1}
+                    | East  -> {tile with X = tile.X + 1}
+                    | South -> {tile with Y = tile.Y + 1}
+                    | West  -> {tile with X = tile.X - 1}
+                Move {Source = tile; Target = frontTile}
     
-    let collisions =
-        targets
-        |> Map.filter (fun _ times -> times > 0)
-        |> Map.keys
-        |> Set
+    if tile |> Elves.neighbourTiles |> areElvesAround elves then next 0
+    else Stay tile
 
-    let elves =
-        actions
-        |> List.map (function
-            | Stay t -> t
-            | Move mp -> if collisions.Contains mp.Target then mp.Source else mp.Target)
-        |> Set
+let run (elves : Elves) directions =
+    let targets = Dictionary ()
+    let newElves = HashSet ()
+
+    let processElf moveProposalsSoFar tile =
+        match proposeAction elves tile directions with
+        | Stay t ->
+            newElves.Add t |> ignore
+            moveProposalsSoFar
+        | Move mp ->
+            match targets.TryGetValue mp.Target with
+            | true, times -> targets.[mp.Target] <- times + 1
+            | _           -> targets.[mp.Target] <- 1
+            mp :: moveProposalsSoFar
+
+    let processMoveProposal mp =
+        match targets.TryGetValue mp.Target with
+        | true, 1 -> newElves.Add mp.Target |> ignore; 1
+        | _       -> newElves.Add mp.Source |> ignore; 0
+
+    let moves =
+        elves
+        |> Seq.fold processElf List.empty
+        |> List.sumBy processMoveProposal
     
-    let newGrove = {grove with Elves = elves}
-    let minRectangle = Grove.computeMinimumRectangle newGrove
-    {Directions = directions; Actions = actions; Collisions = collisions;
-        Grove = newGrove; MinimumGroveRectangle = minRectangle}
+    {Elves = newElves; Moves = moves}
