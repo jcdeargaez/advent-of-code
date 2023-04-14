@@ -27,8 +27,8 @@ let computeEmptyTilesAfterRounds rounds elves =
     finalRound.Elves
     |> Elves.computeEmptyTiles
 
-let findEmptyMovesRound grove =
-    grove
+let findEmptyMovesRound elves =
+    elves
     |> simulate (fun _ result -> result.Moves = 0)
     |> fst
 
