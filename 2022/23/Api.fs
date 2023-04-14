@@ -40,7 +40,7 @@ let main _ =
         |> Elves.parse
     )
 
-    printfn "Parsed grove"
+    printfn "Parsed elves"
 
     let part1 = timeit (fun () ->
         elves
