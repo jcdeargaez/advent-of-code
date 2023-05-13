@@ -1,12 +1,13 @@
+open System.Diagnostics
 open System.IO
 
 open Domain
 
 let timeit f =
-    let sw = System.Diagnostics.Stopwatch.StartNew ()
+    let sw = Stopwatch.StartNew ()
     let r = f ()
     sw.Stop ()
-    printfn "%i ms" sw.ElapsedMilliseconds
+    printfn "%f ms" sw.Elapsed.TotalMilliseconds
     r
 
 let simulate stop elves =
@@ -35,24 +36,21 @@ let findEmptyMovesRound elves =
 [<EntryPoint>]
 let main _ =
     let elves = timeit (fun () ->
-        File.ReadLines "input.txt"
-        // File.ReadLines "sample.txt"
-        |> Elves.parse
-    )
+        "input.txt"
+        |> File.ReadLines
+        |> Elves.parse)
 
     printfn "Parsed elves"
 
     let part1 = timeit (fun () ->
         elves
-        |> computeEmptyTilesAfterRounds 10
-    )
+        |> computeEmptyTilesAfterRounds 10)
 
     printfn "Part 1 - Empty tiles after 10 rounds: %i" part1
 
     let part2 = timeit (fun () ->
         elves
-        |> findEmptyMovesRound
-    )
+        |> findEmptyMovesRound)
 
     printfn "Part 2 - Rounds until no moves: %i" part2
     0

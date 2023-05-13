@@ -4,22 +4,17 @@ open System.Collections.Generic
 
 open Domain
 
-let areElvesAround (elves : Elves) =
-    Array.exists elves.Contains
-
 let proposeAction (elves : Elves) tile directions =
+    let inline areElvesAround (elves : Elves) =
+        Array.exists elves.Contains
+
     let rec next i =
         if i = Array.length directions then Stay tile
         else
             let direction = directions.[i]
             if tile |> Elves.frontTiles direction |> areElvesAround elves then next (i + 1)
             else
-                let frontTile =
-                    match direction with
-                    | North -> {tile with Y = tile.Y - 1}
-                    | East  -> {tile with X = tile.X + 1}
-                    | South -> {tile with Y = tile.Y + 1}
-                    | West  -> {tile with X = tile.X - 1}
+                let frontTile = direction.Front tile
                 Move {Source = tile; Target = frontTile}
     
     if tile |> Elves.neighbourTiles |> areElvesAround elves then next 0

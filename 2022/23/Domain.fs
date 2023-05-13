@@ -2,15 +2,15 @@ namespace Domain
 
 open System.Collections.Generic
 
-type Direction =
-    | North
-    | East
-    | South
-    | West
-
 type Tile = {
     X : int
     Y : int
+}
+
+type Direction = {
+    FrontLeft  : Tile -> Tile
+    Front      : Tile -> Tile
+    FrontRight : Tile -> Tile
 }
 
 type Elves = HashSet<Tile>
