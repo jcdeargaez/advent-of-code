@@ -1,5 +1,3 @@
-open System.IO
-
 module Domain =
     type Range = {
         Begin : int
@@ -33,6 +31,8 @@ module Operations =
         |> Seq.length
 
 module Api =
+    open System.IO
+    
     open Domain
     open Operations
 
