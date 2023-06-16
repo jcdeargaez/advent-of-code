@@ -25,11 +25,6 @@ module Operations =
     let overlapAtAll {Right = right; Left = left} =
         (left.Begin <= right.Begin && right.Begin <= left.End) || (right.Begin <= left.Begin && left.Begin <= right.End)
 
-    let count overlap pairs =
-        pairs
-        |> Seq.filter overlap
-        |> Seq.length
-
 module Api =
     open System.IO
     
@@ -45,19 +40,17 @@ module Api =
                 | _ -> failwith "Invalid format")
         {Left = pairs.[0]; Right = pairs.[1]}
 
-    let readInput path =
+    let processInput path =
+        let count (part1SoFar, part2SoFar) pair =
+            let part1SoFar' = part1SoFar + if fullyContained pair then 1 else 0
+            let part2SoFar' = part2SoFar + if overlapAtAll pair then 1 else 0
+            part1SoFar', part2SoFar'
+
         path
         |> File.ReadLines
         |> Seq.map parseLine
-        |> Seq.toList
+        |> Seq.fold count (0, 0)
 
-    let part1 = count fullyContained
-    let part2 = count overlapAtAll
-
-let pairs = Api.readInput "input.txt"
-
-Api.part1 pairs
-|> printfn "Part 1: %i"
-
-Api.part2 pairs
-|> printfn "Part 2: %i"
+let part1, part2 = Api.processInput "input.txt"
+printfn "Part 1: %i" part1
+printfn "Part 2: %i" part2
