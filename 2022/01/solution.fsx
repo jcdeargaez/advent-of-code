@@ -19,19 +19,19 @@ let solve topN input =
             updateTop caloriesSoFar
             0
     
-    let lastCalories =
-        input
-        |> Seq.fold processLine 0
-    
-    if lastCalories > 0 then
-        updateTop lastCalories
+    input
+    |> Seq.fold processLine 0
+    |> ignore
     
     topDesc
     |> Seq.sum
 
 let input =
-    "sample.txt"
+    "input.txt"
     |> File.ReadLines
 
-printfn "Part 1 - %i" (solve 1 input)
-printfn "Part 2 - %i" (solve 3 input)
+solve 1 input
+|> printfn "Part 1: %i"
+
+solve 3 input
+|> printfn "Part 2: %i"
