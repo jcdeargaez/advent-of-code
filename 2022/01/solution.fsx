@@ -1,7 +1,7 @@
 open System.IO
 
-let solve topN input =
-    let topDesc = ResizeArray<int> (topN + 1)
+let top n items =
+    let topDesc = ResizeArray<int> (n + 1)
 
     let updateTop v =
         let i =
@@ -9,26 +9,37 @@ let solve topN input =
             |> Seq.takeWhile ((<) v)
             |> Seq.length
         topDesc.Insert (i, v)
-        if topDesc.Count > topN then
+        if topDesc.Count > n then
             topDesc.RemoveAt (topDesc.Count - 1)
+    
+    items
+    |> Seq.iter updateTop
 
-    let processLine caloriesSoFar line =
-        if String.length line <> 0 then
-            caloriesSoFar + int line
-        else
-            updateTop caloriesSoFar
-            0
+    topDesc.ToArray ()
+
+let add (input : string) =
+    async {
+        let total =
+            input.Split '\n'
+            |> Seq.map int
+            |> Seq.sum
+        return total
+    }
+
+let solve topN (input : string) =
+    let totals =
+        input.Split "\n\n"
+        |> Seq.map add
+        |> Async.Parallel
+        |> Async.RunSynchronously
     
-    input
-    |> Seq.fold processLine 0
-    |> ignore
-    
-    topDesc
+    totals
+    |> top topN
     |> Seq.sum
 
 let input =
     "input.txt"
-    |> File.ReadLines
+    |> File.ReadAllText
 
 solve 1 input
 |> printfn "Part 1: %i"
