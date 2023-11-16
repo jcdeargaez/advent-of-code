@@ -16,9 +16,7 @@ type HeightMap = {
 
 module Matrix =
     let inline create rows cols value = Array.init rows (fun _ -> Array.replicate cols value)
-
     let inline item row col (matrix : 'a Matrix) = matrix.[row].[col]
-
     let inline setItem row col value (matrix : 'a Matrix) = matrix.[row].[col] <- value
 
 module HeightMap =
@@ -30,7 +28,6 @@ module HeightMap =
         |> Seq.find (fun pos -> pos.Height = height)
 
     let startingPosition = findPosition  (int 'a' - 1)
-    
     let endingPosition = findPosition  (int 'z' + 1)
 
     let adjacentPositions heightMap position =
@@ -72,7 +69,6 @@ module HeightMap =
         steps
 
 module Operations =
-
     let part1 heightMap =
         let filter (position : Position) (neighbor : Position) = neighbor.Height <= position.Height + 1
         let endPosition = HeightMap.endingPosition heightMap
@@ -85,7 +81,6 @@ module Operations =
         let steps =
             HeightMap.endingPosition heightMap
             |> HeightMap.computeSteps heightMap filter
-
         heightMap.Items
         |> Seq.collect id
         |> Seq.filter (fun pos -> pos.Height <= int 'a')
