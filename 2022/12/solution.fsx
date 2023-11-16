@@ -24,7 +24,6 @@ module Matrix =
 module HeightMap =
     let create positions = { Items = positions; Height = positions.Length; Width = positions.[0].Length }
 
-module Operations =
     let findPosition height heightMap =
         heightMap.Items
         |> Seq.collect id
@@ -72,18 +71,20 @@ module Operations =
         compute ()
         steps
 
+module Operations =
+
     let part1 heightMap =
         let filter (position : Position) (neighbor : Position) = neighbor.Height <= position.Height + 1
-        let endPosition = endingPosition heightMap
-        startingPosition heightMap
-        |> computeSteps heightMap filter
+        let endPosition = HeightMap.endingPosition heightMap
+        HeightMap.startingPosition heightMap
+        |> HeightMap.computeSteps heightMap filter
         |> Matrix.item endPosition.Y endPosition.X
     
     let part2 heightMap =
         let filter (position : Position) (neighbor : Position) = neighbor.Height >= position.Height - 1
         let steps =
-            endingPosition heightMap
-            |> computeSteps heightMap filter
+            HeightMap.endingPosition heightMap
+            |> HeightMap.computeSteps heightMap filter
 
         heightMap.Items
         |> Seq.collect id
