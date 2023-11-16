@@ -17,9 +17,9 @@ type HeightMap = {
 module Matrix =
     let inline create rows cols value = Array.init rows (fun _ -> Array.replicate cols value)
 
-    let inline item (matrix : 'a Matrix) row col = matrix.[row].[col]
+    let inline item row col (matrix : 'a Matrix) = matrix.[row].[col]
 
-    let inline setItem (matrix : 'a Matrix) row col value = matrix.[row].[col] <- value
+    let inline setItem row col value (matrix : 'a Matrix) = matrix.[row].[col] <- value
 
 module HeightMap =
     let create positions = { Items = positions; Height = positions.Length; Width = positions.[0].Length }
@@ -37,27 +37,27 @@ module Operations =
     let adjacentPositions heightMap position =
         seq {
             if 0 < position.Y then
-                yield Matrix.item heightMap.Items (position.Y - 1) position.X
+                yield heightMap.Items |> Matrix.item (position.Y - 1) position.X
             if 0 < position.X then
-                yield Matrix.item heightMap.Items position.Y (position.X - 1)
+                yield heightMap.Items |> Matrix.item position.Y (position.X - 1)
             if position.Y + 1 < heightMap.Height then
-                yield Matrix.item heightMap.Items (position.Y + 1) position.X
+                yield heightMap.Items |> Matrix.item (position.Y + 1) position.X
             if position.X + 1 < heightMap.Width then
-                yield Matrix.item heightMap.Items position.Y (position.X + 1)
+                yield heightMap.Items |> Matrix.item position.Y (position.X + 1)
         }
 
     let computeSteps heightMap neighborFilter startPosition =
         let visited = Matrix.create heightMap.Height heightMap.Width false
         let steps = Matrix.create heightMap.Height heightMap.Width System.UInt32.MaxValue
         let queue = ResizeArray<Position> (heightMap.Height * heightMap.Width)
-        Matrix.setItem steps startPosition.Y startPosition.X 0u
+        steps |> Matrix.setItem startPosition.Y startPosition.X 0u
 
         let rec compute () =
             if queue.Count > 0 then
                 let position = queue.[0]
                 queue.RemoveAt 0
-                if Matrix.item visited position.Y position.X |> not then
-                    let currentSteps = Matrix.item steps position.Y position.X
+                if visited |> Matrix.item position.Y position.X |> not then
+                    let currentSteps = steps |> Matrix.item position.Y position.X
                     let adjacentSteps = currentSteps + 1u
                     adjacentPositions heightMap position
                     |> Seq.filter (neighborFilter position)
@@ -65,7 +65,7 @@ module Operations =
                         if adjacentSteps < steps.[pos.Y].[pos.X] then
                             steps.[pos.Y].[pos.X] <- adjacentSteps
                             queue.Add pos)
-                    Matrix.setItem visited position.Y position.X true
+                    visited |> Matrix.setItem position.Y position.X true
                 compute ()
 
         queue.Add startPosition
@@ -74,11 +74,10 @@ module Operations =
 
     let part1 heightMap =
         let filter (position : Position) (neighbor : Position) = neighbor.Height <= position.Height + 1
-        let steps =
-            startingPosition heightMap
-            |> computeSteps heightMap filter
         let endPosition = endingPosition heightMap
-        Matrix.item steps endPosition.Y endPosition.X
+        startingPosition heightMap
+        |> computeSteps heightMap filter
+        |> Matrix.item endPosition.Y endPosition.X
     
     let part2 heightMap =
         let filter (position : Position) (neighbor : Position) = neighbor.Height >= position.Height - 1
@@ -89,7 +88,7 @@ module Operations =
         heightMap.Items
         |> Seq.collect id
         |> Seq.filter (fun pos -> pos.Height <= int 'a')
-        |> Seq.map (fun pos -> Matrix.item steps pos.Y pos.X)
+        |> Seq.map (fun pos -> steps |> Matrix.item pos.Y pos.X)
         |> Seq.min
 
 let parseHeight =
