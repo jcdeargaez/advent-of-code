@@ -27,8 +27,8 @@ module HeightMap =
         |> Seq.collect id
         |> Seq.find (fun pos -> pos.Height = height)
 
-    let startingPosition = findPosition  (int 'a' - 1)
-    let endingPosition = findPosition  (int 'z' + 1)
+    let startingPosition = findPosition (int 'a' - 1)
+    let endingPosition = findPosition (int 'z' + 1)
 
     let adjacentPositions heightMap position =
         seq {
