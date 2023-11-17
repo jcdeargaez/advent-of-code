@@ -58,7 +58,7 @@ module HeightMap =
                     adjacentPositions heightMap position
                     |> Seq.filter (neighborFilter position)
                     |> Seq.iter (fun pos ->
-                        if adjacentSteps < steps |> Matrix.item pos.Y pos.X then
+                        if adjacentSteps < (steps |> Matrix.item pos.Y pos.X) then
                             steps |> Matrix.setItem pos.Y pos.X adjacentSteps
                             queue.Add pos)
                     visited |> Matrix.setItem position.Y position.X true
