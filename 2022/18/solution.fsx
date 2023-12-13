@@ -25,9 +25,9 @@ module Parser =
 
     let parse input =
         let pcomma = skipChar ','
-        let pnumbercomma = pint32 .>> pcomma
+        let pnumberComma = pint32 .>> pcomma
         let ppoint =
-            tuple3 pnumbercomma pnumbercomma pint32
+            tuple3 pnumberComma pnumberComma pint32
             |>> fun (x, y, z) -> { X = x; Y = y; Z = z }
         let ppointLine = ppoint .>> skipNewline
         let ppointLineEof = many1 ppointLine .>> eof        
@@ -87,7 +87,7 @@ let part1 =
 let part2 =
     let boundingBox = BoundingBox.create input
 
-    let rec inner sidesSoFar  =
+    let rec traverseVolume sidesSoFar  =
         function
         | [] -> sidesSoFar
         | p :: ps ->
@@ -101,18 +101,17 @@ let part2 =
             
             let nextPoints =
                 Point.neighbors p
-                |> Seq.filter (fun n ->
-                       BoundingBox.inBoundingBox boundingBox n
-                    && sidesSoFar |> Map.containsKey n |> not
-                    && allPoints |> Set.contains n |> not)
+                |> Seq.filter (BoundingBox.inBoundingBox boundingBox)
+                |> Seq.filter (allPoints.Contains >> not)
+                |> Seq.filter (sidesSoFar.ContainsKey >> not)
                 |> Seq.toList
             
             nextPoints @ ps
-            |> inner sidesSoFar'
+            |> traverseVolume sidesSoFar'
     
     let sides =
         List.singleton { X = boundingBox.MinX; Y = boundingBox.MinY; Z = boundingBox.MinZ }
-        |> inner Map.empty
+        |> traverseVolume Map.empty
     
     sides
     |> Map.values
