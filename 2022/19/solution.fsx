@@ -58,7 +58,7 @@ module Parser =
         let pblueprintLine = pblueprint .>> skipNewline
         let pblueprintLineEof = many1 pblueprintLine .>> eof
         match input |> run pblueprintLineEof with
-        | Success (b, _, _) -> b
+        | Success (blueprints, _, _) -> blueprints
         | Failure (errorMsg, _, _) -> failwith errorMsg
 
 let simulate minutes blueprint =
