@@ -1,5 +1,4 @@
 from functools import reduce
-from datetime import datetime
 import operator as op
 
 DIVIDERS = [
@@ -68,20 +67,11 @@ def read_input(lines):
             yield parse_packet(line)
 
 if __name__ == "__main__":
-    for _ in range(3):
-        t0 = datetime.now()
+    with open("input.txt") as fin:
+        packets = list(read_input(fin))
+    
+    p1 = part1(packets)
+    print(f"Part 1: {p1}")
 
-        with open("input.txt") as fin:
-            packets = list(read_input(fin))
-        t1 = datetime.now()
-
-        p1 = part1(packets)
-        t2 = datetime.now()
-
-        p2 = part2(packets)
-        t3 = datetime.now()
-
-        print(f"Read input {(t1 - t0).total_seconds() * 1000} ms")
-        print(f"Part 1 {p1} {(t2 - t1).total_seconds() * 1000} ms")
-        print(f"Part 2 {p2} {(t3 - t2).total_seconds() * 1000} ms")
-        print()
+    p2 = part2(packets)
+    print(f"Part 2: {p2}")

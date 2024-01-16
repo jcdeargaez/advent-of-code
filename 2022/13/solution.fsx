@@ -1,5 +1,6 @@
-﻿open System.IO
-open System.Text
+﻿#r "nuget: FParsec"
+
+open System.IO
 
 type Packet =
     | Number of int
@@ -10,52 +11,40 @@ let dividers = [
     Numbers [Numbers [Number 6]]
 ]
 
-let parsePacket (line : string) =
-    let sb = StringBuilder ()
+module Parser =
+    open FParsec
 
-    let rec parseList i packetSoFar =
-        let c = line.[i]
-        if c = ']' then
-            let packetSoFar' =
-                if sb.Length = 0 then packetSoFar
-                else (sb.ToString () |> int |> Number) :: packetSoFar
-            i, packetSoFar' |> List.rev |> Numbers
-        else
-            let i', packetSoFar' =
-                match c with
-                | '[' ->
-                    let ni, np = parseList (i + 1) []
-                    ni, np :: packetSoFar
-                | ',' ->
-                    if sb.Length = 0 then i, packetSoFar
-                    else
-                        let n = sb.ToString () |> int |> Number
-                        sb.Clear () |> ignore
-                        i, n :: packetSoFar
-                | digit ->
-                    sb.Append digit |> ignore
-                    i, packetSoFar
-            
-            parseList (i' + 1) packetSoFar'
+    let private ppacket =
+        let pnumber = pint32 |>> Number
+        let pnumbers, pnumbersref = createParserForwardedToRef ()
+        let pitem = pnumber <|> pnumbers
+        let items = sepBy pitem (skipChar ',')
+        let pitems = between (skipChar '[') (skipChar ']') items |>> Numbers
+        pnumbersref.Value <- pitems
+        pnumbers
+    
+    let private ppacketEof = ppacket .>> eof
 
-    parseList 1 []
-    |> snd
+    let parsePacket line =
+        match line |> run ppacketEof with
+        | Success (packet, _, _) -> packet
+        | Failure (errorMsg, _, _) -> failwith errorMsg
 
-let rec compare (left, right) =
+let rec compare left right =
     match left, right with
     | Number a, Number b   -> if a < b then -1 elif a > b then 1 else 0
-    | Number _, Numbers _  -> compare (Numbers [left], right)
-    | Numbers _, Number _  -> compare (left, Numbers [right])
+    | Number _, Numbers _  -> compare (Numbers [left]) right
+    | Numbers _, Number _  -> compare left (Numbers [right])
     | Numbers a, Numbers b ->
         Seq.zip a b
-        |> Seq.map compare
+        |> Seq.map ((<||) compare)
         |> Seq.tryFind ((<>) 0)
-        |> Option.defaultWith (fun () -> compare (Number a.Length, Number b.Length))
+        |> Option.defaultWith (fun () -> compare (Number a.Length) (Number b.Length))
 
 let part1 packets =
     packets
     |> Seq.chunkBySize 2
-    |> Seq.mapi (fun i a -> if compare (a.[0], a.[1]) = -1 then i + 1 else 0)
+    |> Seq.mapi (fun i a -> if compare a.[0] a.[1] = -1 then i + 1 else 0)
     |> Seq.sum
 
 let part2 packets =
@@ -63,7 +52,7 @@ let part2 packets =
     let updateLessers packet =
         dividers
         |> List.iteri (fun i p ->
-            if compare (packet, p) = -1 then
+            if compare packet p = -1 then
                 lessers.[i] <- lessers.[i] + 1)
 
     dividers @ packets
@@ -72,30 +61,14 @@ let part2 packets =
     lessers
     |> Array.reduce ( * )
 
-let readInput lines =
-    lines
+let packets =
+    File.ReadLines "input.txt"
     |> Seq.filter (String.length >> (<>) 0)
-    |> Seq.map parsePacket
+    |> Seq.map Parser.parsePacket
+    |> Seq.toList
 
-{0..2}
-|> Seq.iter (fun i ->
-    printfn "Running %s" (if i = 0 then "cold start" else string i)
-    let sw = System.Diagnostics.Stopwatch.StartNew ()
+part1 packets
+|> printfn "Part 1: %i"
 
-    let packets =
-        File.ReadLines "input.txt"
-        |> readInput
-        |> Seq.toList 
-    let t1 = sw.Elapsed.TotalMilliseconds
-
-    let p1 = part1 packets
-    let t2 = sw.Elapsed.TotalMilliseconds
-
-    let p2 = part2 packets
-    let t3 = sw.Elapsed.TotalMilliseconds 
-
-    printfn "Read input %.5f ms" t1
-    printfn "Part 1 %i %.5f ms" p1 (t2 - t1)
-    printfn "Part 2 %i %.5f ms" p2 (t3 - t2)
-    printfn ""
-)
+part2 packets
+|> printfn "Part 2: %i"
