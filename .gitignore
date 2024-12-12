@@ -1,5 +1,5 @@
 .DS_Store
-bin
-obj
-node_modules
-fable_modules
+2022/*/bin
+2022/*/obj
+target
+Cargo.lock
