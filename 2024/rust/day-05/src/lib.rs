@@ -2,32 +2,28 @@ use std::collections::{HashMap, HashSet};
 
 mod parser {
     use nom::{
-        character::complete::{char, digit1, newline},
-        combinator::{eof, map_res},
+        character::complete::{char, newline, usize},
+        combinator::eof,
         multi::{many1, separated_list1},
-        sequence::{separated_pair, terminated}, IResult
+        sequence::{separated_pair, terminated}, IResult, Parser
     };
 
-    fn parse_page_number(input: &str) -> IResult<&str, usize> {
-        map_res(digit1, str::parse)(input)
-    }
-
     fn parse_rule(input: &str) -> IResult<&str, (usize, usize)> {
-        separated_pair(parse_page_number, char('|'), parse_page_number)(input)
+        separated_pair(usize, char('|'), usize).parse(input)
     }
 
     fn parse_rules(input: &str) -> IResult<&str, Vec<(usize, usize)>> {
         let prule_nl = terminated(parse_rule, newline);
-        terminated(many1(prule_nl), newline)(input)
+        terminated(many1(prule_nl), newline).parse(input)
     }
 
     fn parse_update(input: &str) -> IResult<&str, Vec<usize>> {
-        separated_list1(char(','), parse_page_number)(input)
+        separated_list1(char(','), usize).parse(input)
     }
 
     fn parse_updates(input: &str) -> IResult<&str, Vec<Vec<usize>>> {
         let pupdate_nl = terminated(parse_update, newline);
-        many1(pupdate_nl)(input)
+        many1(pupdate_nl).parse(input)
     }
 
     pub fn parse_input(input: &str) -> IResult<&str, (Vec<(usize, usize)>, Vec<Vec<usize>>)> {

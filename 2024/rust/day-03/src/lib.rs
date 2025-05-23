@@ -1,28 +1,24 @@
 mod parser {
     use nom::branch::alt;
     use nom::bytes::complete::tag;
-    use nom::character::complete::{char, digit1};
-    use nom::combinator::{map, map_res};
-    use nom::sequence::{delimited, tuple};
-    use nom::IResult;
-
-    fn number(input: &str) -> IResult<&str, usize> {
-        map_res(digit1, str::parse)(input)
-    }
+    use nom::character::complete::{char, usize};
+    use nom::combinator::map;
+    use nom::sequence::delimited;
+    use nom::{IResult, Parser};
 
     fn operands_pair(input: &str) -> IResult<&str, (usize, usize)> {
-        let pnumbers = tuple((number, tag(","), number));
-        map(pnumbers, |(lhs, _, rhs)| (lhs, rhs))(input)
+        let pnumbers = (usize, tag(","), usize);
+        map(pnumbers, |(lhs, _, rhs)| (lhs, rhs)).parse(input)
     }
 
     pub fn mul(input: &str) -> IResult<&str, usize> {
         let pmul = delimited(tag("mul("), operands_pair, char(')'));
-        map(pmul, |(a, b)| a * b)(input)
+        map(pmul, |(a, b)| a * b).parse(input)
     }
 
     pub fn do_dont(input: &str) -> IResult<&str, bool> {
         let pdodont = alt((tag("don't"), tag("do")));
-        map(pdodont, |dodont| dodont != "don't")(input)
+        map(pdodont, |dodont| dodont != "don't").parse(input)
     }
 }
 

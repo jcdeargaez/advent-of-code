@@ -1,33 +1,25 @@
 use std::collections::VecDeque;
 
 struct Equation {
-    test_value: u64,
-    values: Vec<u64>
+    test_value: usize,
+    values: Vec<usize>
 }
 
 mod parser {
     use nom::{
-        bytes::complete::tag,
-        character::complete::{char, digit1, newline},
-        combinator::{eof, map_res},
-        multi::{many1, separated_list1},
-        sequence::{separated_pair, terminated}, IResult
+        bytes::complete::tag, character::complete::{char, newline, usize}, combinator::eof, multi::{many1, separated_list1}, sequence::{separated_pair, terminated}, IResult, Parser
     };
 
     use crate::Equation;
-    
-    fn parse_number(input: &str) -> IResult<&str, u64> {
-        map_res(digit1, str::parse)(input)
-    }
 
     fn parse_equation(input: &str) -> IResult<&str, Equation> {
-        let (input, (test_value, values)) = separated_pair(parse_number, tag(": "), separated_list1(char(' '), parse_number))(input)?;
+        let (input, (test_value, values)) = separated_pair(usize, tag(": "), separated_list1(char(' '), usize)).parse(input)?;
         Ok((input, Equation { test_value, values }))
     }
 
     pub fn parse_input(input: &str) -> Vec<Equation> {
         let pequation_nl = terminated(parse_equation, newline);
-        let (_input, equations) = terminated(many1(pequation_nl), eof)(input).expect("Expected valid equations input");
+        let (_input, equations) = terminated(many1(pequation_nl), eof).parse(input).expect("Expected valid equations input");
         equations
     }
 }
@@ -47,7 +39,7 @@ impl Equation {
                 pending.push_back((i + 1, total_so_far * v));
                 pending.push_back((i + 1, total_so_far + v));
                 if concat_op {
-                    pending.push_back((i + 1, format!("{}{}", total_so_far, v).parse::<u64>().expect("Expected a number to parse")));
+                    pending.push_back((i + 1, format!("{}{}", total_so_far, v).parse::<usize>().expect("Expected a number to parse")));
                 }
             }
         }
@@ -55,7 +47,7 @@ impl Equation {
     }
 }
 
-pub fn part1(input: &str) -> u64 {
+pub fn part1(input: &str) -> usize {
     parser::parse_input(input)
         .iter()
         .filter(|e| e.has_solution(false))
@@ -63,7 +55,7 @@ pub fn part1(input: &str) -> u64 {
         .sum()
 }
 
-pub fn part2(input: &str) -> u64 {
+pub fn part2(input: &str) -> usize {
     parser::parse_input(input)
         .iter()
         .filter(|e| e.has_solution(true))

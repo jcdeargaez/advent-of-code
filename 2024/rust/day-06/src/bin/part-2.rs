@@ -1,8 +1,6 @@
-use std::fs;
-
 use day_06::part2;
 
 fn main() {
-    let content = fs::read_to_string("./input.txt").unwrap();
+    let content = include_str!("../../input.txt");
     println!("Part 2: {}", part2(&content));
 }
