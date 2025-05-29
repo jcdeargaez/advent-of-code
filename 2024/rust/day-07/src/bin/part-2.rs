@@ -1,6 +1,7 @@
-use day_07::part2;
+use day_07::prelude::{parse_input, part2};
 
 fn main() {
     let content = include_str!("../../input.txt");
-    println!("Part 2: {}", part2(&content));
+    let input = parse_input(content);
+    println!("Part 2: {}", part2(&input));
 }
