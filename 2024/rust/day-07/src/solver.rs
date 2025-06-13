@@ -18,8 +18,8 @@ pub fn part2(input: &[Equation]) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use crate::parser;
     use super::*;
+    use crate::parser;
 
     const INPUT: &str = "\
 190: 10 19
